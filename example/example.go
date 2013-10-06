@@ -9,7 +9,7 @@ import (
 
 func main() {
 	addr := ":8000"
-	fmt.Println("serving requests at http://localhost" + addr)
+	fmt.Println("Serving requests at http://localhost" + addr)
 
 	csp := httpcsp.New().
 		DefaultSrc(httpcsp.SELF).
@@ -20,11 +20,11 @@ func main() {
 	http.Handle("/", httpcsp.HandlerFunc(csp, func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w,
 			`<html>
-				<body>
-					<strong>Boom!</strong>
-					<img src="https://travis-ci.org/bmatsuo/go-httpcsp.png?branch=master"/>
-					<strong>Zing!</strong>
-				</body>
+			<body>
+				<strong>Boom!</strong>
+				<img src="https://travis-ci.org/bmatsuo/go-httpcsp.png?branch=master"/>
+				<strong>Zing!</strong>
+			</body>
 			</html>`)
 	}))
 

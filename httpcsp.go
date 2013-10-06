@@ -23,6 +23,9 @@ import (
 )
 
 const (
+	// the empty source-list
+	NONE          = "'none'"
+
 	// allowed keyword-sources
 	SELF          = "'self'"
 	UNSAFE_INLINE = "'unsafe-inline'"
