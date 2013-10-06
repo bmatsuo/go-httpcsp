@@ -106,7 +106,10 @@ func fontSrc(src ...string) directive { // 4.8
 func connectSrc(src ...string) directive { // 4.9
 	return wspList{"connect-src", src}
 }
-func reportURI(uri ...string) directive { // 4.9
+func sandbox(token ...string) directive { // 4.10
+	return wspList{"sandbox", token}
+}
+func reportURI(uri ...string) directive { // 4.11
 	return wspList{"report-uri", uri}
 }
 
@@ -166,9 +169,9 @@ func (csp *CSP) ConnectSrc(src ...string) *CSP { // 4.9
 	return csp.addDirective(connectSrc(src...))
 }
 
-// The sandbox directive (TODO).
-func (csp *CSP) Sandbox(test *CSP) *CSP { // 4.10 (Optional)
-	return csp
+// The sandbox directive.
+func (csp *CSP) Sandbox(token ...string) *CSP { // 4.10 (Optional)
+	return csp.addDirective(sandbox(token...))
 }
 
 // The report-uri directive.
