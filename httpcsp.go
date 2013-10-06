@@ -79,40 +79,6 @@ func (list wspList) EncodeDirective() string {
 	return fmt.Sprintf("%s %s", list.name, strings.Join(list.srcs, " "))
 }
 
-func defaultSrc(src ...string) directive { // 4.1
-	return wspList{"default-src", src}
-}
-func scriptSrc(src ...string) directive { // 4.2
-	return wspList{"script-src", src}
-}
-func objectSrc(src ...string) directive { // 4.3
-	return wspList{"object-src", src}
-}
-func styleSrc(src ...string) directive { // 4.4
-	return wspList{"style-src", src}
-}
-func imgSrc(src ...string) directive { // 4.5
-	return wspList{"img-src", src}
-}
-func mediaSrc(src ...string) directive { // 4.6
-	return wspList{"media-src", src}
-}
-func frameSrc(src ...string) directive { // 4.7
-	return wspList{"frame-src", src}
-}
-func fontSrc(src ...string) directive { // 4.8
-	return wspList{"font-src", src}
-}
-func connectSrc(src ...string) directive { // 4.9
-	return wspList{"connect-src", src}
-}
-func sandbox(token ...string) directive { // 4.10
-	return wspList{"sandbox", token}
-}
-func reportURI(uri ...string) directive { // 4.11
-	return wspList{"report-uri", uri}
-}
-
 // A security policy for a web resource.
 type CSP struct {
 	m map[string]directive
@@ -126,57 +92,57 @@ func New() *CSP {
 
 // The default-src directive.
 func (csp *CSP) DefaultSrc(src ...string) *CSP { // 4.1
-	return csp.addDirective(defaultSrc(src...))
+	return csp.addDirective(wspList{"default-src", src})
 }
 
 // The script-src directive.
 func (csp *CSP) ScriptSrc(src ...string) *CSP { // 4.2
-	return csp.addDirective(scriptSrc(src...))
+	return csp.addDirective(wspList{"script-src", src})
 }
 
 // The object-src directive.
 func (csp *CSP) ObjectSrc(src ...string) *CSP { // 4.3
-	return csp.addDirective(objectSrc(src...))
+	return csp.addDirective(wspList{"object-src", src})
 }
 
 // The style-src directive.
 func (csp *CSP) StyleSrc(src ...string) *CSP { // 4.4
-	return csp.addDirective(styleSrc(src...))
+	return csp.addDirective(wspList{"style-src", src})
 }
 
 // The img-src directive.
 func (csp *CSP) ImgSrc(src ...string) *CSP { // 4.5
-	return csp.addDirective(imgSrc(src...))
+	return csp.addDirective(wspList{"img-src", src})
 }
 
 // The media-src directive.
 func (csp *CSP) MediaSrc(src ...string) *CSP { // 4.6
-	return csp.addDirective(mediaSrc(src...))
+	return csp.addDirective(wspList{"media-src", src})
 }
 
 // The frame-src directive.
 func (csp *CSP) FrameSrc(src ...string) *CSP { // 4.7
-	return csp.addDirective(frameSrc(src...))
+	return csp.addDirective(wspList{"frame-src", src})
 }
 
 // The font-src directive.
 func (csp *CSP) FontSrc(src ...string) *CSP { // 4.8
-	return csp.addDirective(fontSrc(src...))
+	return csp.addDirective(wspList{"font-src", src})
 }
 
 // The connect-src directive.
 func (csp *CSP) ConnectSrc(src ...string) *CSP { // 4.9
-	return csp.addDirective(connectSrc(src...))
+	return csp.addDirective(wspList{"connect-src", src})
 }
 
 // The sandbox directive.
 func (csp *CSP) Sandbox(token ...string) *CSP { // 4.10 (Optional)
-	return csp.addDirective(sandbox(token...))
+	return csp.addDirective(wspList{"sandbox", token})
 }
 
 // The report-uri directive.
 func (csp *CSP) ReportURI(uri ...string) *CSP { // 4.11
-	return csp.addDirective(reportURI(uri...))
+	return csp.addDirective(wspList{"report-uri", uri})
 }
 
 func (csp *CSP) addDirective(d directive) *CSP {
