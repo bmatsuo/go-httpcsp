@@ -62,7 +62,7 @@ func ViolationHandler(f func(*Violation)) http.Handler {
 		defer req.Body.Close()
 
 		mime := strings.SplitN(req.Header.Get("Content-Type"), ";", 2)[0]
-		if mime != "application/json" {
+		if mime != "application/json" && mime != "application/csp-report" {
 			http.Error(resp, "", http.StatusUnsupportedMediaType)
 			return
 		}
