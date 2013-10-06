@@ -24,7 +24,7 @@ import (
 
 const (
 	// the empty source-list
-	NONE          = "'none'"
+	NONE = "'none'"
 
 	// allowed keyword-sources
 	SELF          = "'self'"
@@ -32,7 +32,7 @@ const (
 	UNSAFE_EVAL   = "'unsafe-eval'"
 
 	// common scheme-sources
-	HTTPS         = "https:"
+	HTTPS = "https:"
 )
 
 // A description of a security policy violation.
