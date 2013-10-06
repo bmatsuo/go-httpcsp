@@ -25,9 +25,12 @@ import (
 )
 
 const (
+	// allowed keyword-sources
 	SELF          = "'self'"
 	UNSAFE_INLINE = "'unsafe-inline'"
 	UNSAFE_EVAL   = "'unsafe-eval'"
+
+	// common scheme-sources
 	HTTPS         = "https:"
 )
 
