@@ -11,13 +11,14 @@ func main() {
 	addr := ":8000"
 	fmt.Println("Serving requests at http://localhost" + addr)
 
-	csp := httpcsp.New().
+	csp := httpcsp.Make().
 		DefaultSrc(httpcsp.SELF).
 		ImgSrc(httpcsp.SELF).
-		ReportURI("/policy/violation")
-	fmt.Println("Content-Security-Policy:", csp.Encode())
+		ReportURI("/policy/violation").
+		MustFinalize()
+	fmt.Println("Content-Security-Policy:", csp)
 
-	http.Handle("/", httpcsp.HandlerFunc(csp, func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w,
 			`<html>
 			<body>
@@ -26,11 +27,12 @@ func main() {
 				<strong>Zing!</strong>
 			</body>
 			</html>`)
-	}))
+	})
 
 	http.Handle("/policy/violation",
 		httpcsp.ViolationHandler(func(v *httpcsp.Violation) {
 			fmt.Printf("violation: %#v\n", v.CSP)
 		}))
-	http.ListenAndServe(addr, http.DefaultServeMux)
+
+	http.ListenAndServe(addr, csp.Middleware(http.DefaultServeMux))
 }
