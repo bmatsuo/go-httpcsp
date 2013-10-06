@@ -6,11 +6,10 @@
 
 /*
 Web server utilities for implementing Content Security Policy (CSP) 1.0.
-Go-httpcsp provides a type, CSP, which describes a security policy and can
-be applied to http.ResponseWriter types. It also provides a simple
-wrapper function, ViolationHandler, for creating http.Handlers for dealing
-with reports of attempted policy violation.
-
+Go-httpcsp provides a type, CSP, which describes a security policy and can be
+applied to http.ResponseWriter types. It also provides a simple wrapper
+function, ViolationHandler, for creating http.Handlers for dealing with reports
+of attempted policy violation.
 
 For more information see Content Security Policy 1.0 (http://www.w3.org/TR/CSP).
 */
@@ -199,7 +198,12 @@ func (csp *CSP) Apply(header http.Header) {
 	header.Set("Content-Security-Policy", csp.Encode())
 }
 
-// Apply csp on all responses served by handler
+// Set header's Content-Security-Policy-Report-Only to the encoded csp.
+func (csp *CSP) ReportOnly(header http.Header) {
+	header.Set("Content-Security-Policy-Report-Only", csp.Encode())
+}
+
+// Wrap handler so csp is applied to all responses
 func Handler(csp *CSP, handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		csp.Apply(w.Header())
@@ -207,7 +211,21 @@ func Handler(csp *CSP, handler http.Handler) http.Handler {
 	})
 }
 
+// Wrap handler so csp violations are reported without blocking.
+// See ReportOnly().
+func ReportOnlyHandler(csp *CSP, handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		csp.ReportOnly(w.Header())
+		handler.ServeHTTP(w, r)
+	})
+}
+
 // See Handler().
 func HandlerFunc(csp *CSP, handler http.HandlerFunc) http.Handler {
 	return Handler(csp, handler)
+}
+
+// See ReportOnlyHandler().
+func ReportOnlyHandlerFunc(csp *CSP, handler http.HandlerFunc) http.Handler {
+	return ReportOnlyHandler(csp, handler)
 }
