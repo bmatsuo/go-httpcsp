@@ -11,9 +11,8 @@ be applied to http.ResponseWriter types. It also provides a simple
 wrapper function, ViolationHandler, for creating http.Handlers for dealing
 with reports of attempted policy violation.
 
-References
 
-[1] Content Security Policy 1.0 - http://www.w3.org/TR/CSP
+For more information see Content Security Policy 1.0 (http://www.w3.org/TR/CSP).
 */
 package httpcsp
 
@@ -117,6 +116,12 @@ type CSP struct {
 	m map[string]directive
 }
 
+func New() *CSP {
+	csp := new(CSP)
+	csp.m = make(map[string]directive)
+	return csp
+}
+
 // The default-src directive.
 func (csp *CSP) DefaultSrc(src ...string) *CSP { // 4.1
 	return csp.addDirective(defaultSrc(src...))
@@ -192,4 +197,17 @@ func (csp *CSP) Encode() string {
 // Set header's Content-Security-Policy to the encoded csp.
 func (csp *CSP) Apply(header http.Header) {
 	header.Set("Content-Security-Policy", csp.Encode())
+}
+
+// Apply csp on all responses served by handler
+func Handler(csp *CSP, handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		csp.Apply(w.Header())
+		handler.ServeHTTP(w, r)
+	})
+}
+
+// See Handler().
+func HandlerFunc(csp *CSP, handler http.HandlerFunc) http.Handler {
+	return Handler(csp, handler)
 }
