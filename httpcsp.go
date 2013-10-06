@@ -180,8 +180,8 @@ func Handler(csp *CSP, handler http.Handler) http.Handler {
 	})
 }
 
-// Wrap handler so csp violations are reported without blocking.
-// See ReportOnly().
+// Like Handler(), but csp violations are reported without blocking.
+// Also see ReportOnly().
 func ReportOnlyHandler(csp *CSP, handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		csp.ReportOnly(w.Header())
