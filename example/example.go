@@ -13,29 +13,24 @@ func main() {
 
 	csp := httpcsp.New().
 		DefaultSrc(httpcsp.SELF).
-		//ImgSrc(httpcsp.HTTPS).
 		ImgSrc(httpcsp.SELF).
 		ReportURI("/policy/violation")
 	fmt.Println("Content-Security-Policy:", csp.Encode())
 
 	http.Handle("/", httpcsp.HandlerFunc(csp, func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprint(w,
-				`<html>
-					<body>
-						<strong>Boom!</strong>
-						<img src="https://travis-ci.org/bmatsuo/go-httpcsp.png?branch=master"/>
-						<strong>Zing!</strong>
-					</body>
-				</html>`)
-		}))
+		fmt.Fprint(w,
+			`<html>
+				<body>
+					<strong>Boom!</strong>
+					<img src="https://travis-ci.org/bmatsuo/go-httpcsp.png?branch=master"/>
+					<strong>Zing!</strong>
+				</body>
+			</html>`)
+	}))
 
 	http.Handle("/policy/violation",
-		httpcsp.ViolationHandler(func(v *httpcsp.Violation, err error) {
-			if err == nil {
-				fmt.Printf("violation: %#v\n", v.CSP)
-			} else {
-				fmt.Printf("error parsing violation report: %v\n", err)
-			}
+		httpcsp.ViolationHandler(func(v *httpcsp.Violation) {
+			fmt.Printf("violation: %#v\n", v.CSP)
 		}))
 	http.ListenAndServe(addr, http.DefaultServeMux)
 }

@@ -48,16 +48,33 @@ type Violation struct {
 
 // Create a handler for security policy violations. Used in conjunction with
 // CSP.ReportURI.
-func ViolationHandler(f func(*Violation, error)) http.Handler {
-	if f == nil {
-		f = func(*Violation, error) {}
-	}
+func ViolationHandler(f func(*Violation)) http.Handler {
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		if req.Method != "POST" {
+			resp.Header().Set("Allow", "POST")
+			http.Error(resp, "", http.StatusMethodNotAllowed)
+			return
+		}
+
+		defer req.Body.Close()
+
+		mime := strings.SplitN(req.Header.Get("Content-Type"), ";", 2)[0]
+		if mime != "application/json" {
+			http.Error(resp, "", http.StatusUnsupportedMediaType)
+			return
+		}
+
 		v := new(Violation)
 		dec := json.NewDecoder(req.Body)
-		defer req.Body.Close()
 		err := dec.Decode(v)
-		f(v, err)
+		if err != nil {
+			http.Error(resp, "", http.StatusBadRequest)
+			return
+		}
+
+		if f != nil {
+			f(v)
+		}
 	})
 }
 
