@@ -101,6 +101,7 @@ type CSP struct {
 	m map[string]directive
 }
 
+// Create a new security policy.
 func New() *CSP {
 	csp := new(CSP)
 	csp.m = make(map[string]directive)
