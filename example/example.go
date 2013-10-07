@@ -28,14 +28,14 @@ func main() {
 }
 
 func Root(resp http.ResponseWriter, req *http.Request) {
-	fmt.Fprint(resp,
-		`<html>
-		<body>
+	fmt.Fprint(resp, `
+	<html>
+	<body>
 		<strong>Boom!</strong>
 		<img src="https://travis-ci.org/bmatsuo/go-httpcsp.png?branch=master"/>
 		<strong>Zing!</strong>
-		</body>
-		</html>`)
+	</body>
+	</html>`)
 }
 
 func CSPViolation(v *httpcsp.Violation) {
