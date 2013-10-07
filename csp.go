@@ -102,8 +102,6 @@ func compileList(dvals []string) string {
 }
 
 // Compile csp into a form that can be applied to response headers.
-//
-// BUG(bmatsuo): invalid directive values are not checked in Policy.Compile()
 func (csp Policy) Compile() (CompiledPolicy, error) {
 	// group directives by name
 	bucket := make(map[string][]string)
