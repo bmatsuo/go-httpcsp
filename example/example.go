@@ -11,7 +11,7 @@ func main() {
 	addr := ":8000"
 	fmt.Println("Serving requests at http://localhost" + addr)
 
-	csp := httpcsp.Make().
+	csp := httpcsp.New().
 		DefaultSrc(httpcsp.NONE).
 		ScriptSrc(httpcsp.SELF).
 		ImgSrc(httpcsp.SELF).

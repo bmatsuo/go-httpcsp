@@ -13,7 +13,7 @@ type Directive struct {
 	Value string
 }
 
-func Make() Policy {
+func New() Policy {
 	return make(Policy, 0)
 }
 
