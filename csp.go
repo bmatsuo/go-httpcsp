@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sort"
 )
+
+// flag for testing
+var _FIX_COMPILE_ORDER bool
 
 type Policy []*Directive
 
@@ -88,7 +92,7 @@ func compileList(dvals []string) string {
 		switch {
 		case d == NONE:
 			c = NONE
-		case c == NONE:
+		case c == NONE || c == "":
 			c = d
 		default:
 			c = fmt.Sprintf("%s %s", c, d)
@@ -116,6 +120,10 @@ func (csp Policy) Compile() (CompiledPolicy, error) {
 
 		d := fmt.Sprintf("%s %s", dname, dval)
 		dstrs = append(dstrs, d)
+	}
+
+	if _FIX_COMPILE_ORDER {
+		sort.Strings(dstrs)
 	}
 
 	compiled := CompiledPolicy(strings.Join(dstrs, "; "))
