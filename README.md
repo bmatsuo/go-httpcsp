@@ -1,4 +1,6 @@
-[godoc.org]: http://godoc.org/github.com/bmatsuo/go-httpcsp/ "godoc.org"
+[godoc.org]: http://godoc.org/github.com/bmatsuo/go-httpcsp/
+[csp 1.0]: "http://www.w3.org/TR/CSP"
+[using csp]: "https://developer.mozilla.org/en-US/docs/Security/CSP/Using_Content_Security_Policy"
 
 [![Build Status](https://travis-ci.org/bmatsuo/go-httpcsp.png?branch=master)](https://travis-ci.org/bmatsuo/go-httpcsp)
 
@@ -14,10 +16,14 @@ Example
 
     go run example/example.go
 
-Docs
-====
+Reference
+=========
 
-On [godoc.org][]
+The API documentation is visible on [godoc.org][godoc.org]
+
+For general reference see the [CSP 1.0 W3C Candidate Recommendation][csp 1.0].
+
+For policy examples see Mozilla's [Using Content Security Policy][using csp].
 
 Author
 ======
