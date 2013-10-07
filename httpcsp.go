@@ -18,7 +18,13 @@ applied to http.ResponseWriter types. It also provides a simple wrapper
 function, ViolationHandler, for creating http.Handlers for dealing with reports
 of attempted policy violation.
 
-For more information see Content Security Policy 1.0 (http://www.w3.org/TR/CSP).
+References
+
+For general information see the Content Security Policy 1.0 technical report
+document (http://www.w3.org/TR/CSP).
+
+For example security policies see Mozilla's Using Content Security Policy
+(https://developer.mozilla.org/en-US/docs/Security/CSP/Using_Content_Security_Policy).
 */
 package httpcsp
 
