@@ -1,6 +1,7 @@
 package httpcsp
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -81,55 +82,73 @@ func (csp Policy) addDirectives(name string, values []string) Policy {
 	return _csp
 }
 
-func (csp Policy) Finalize() (FinalizedPolicy, error) {
+func compileList(dvals []string) string {
+	var c string
+	for _, d := range dvals {
+		switch {
+		case d == NONE:
+			c = NONE
+		case c == NONE:
+			c = d
+		default:
+			c = fmt.Sprintf("%s %s", c, d)
+		}
+	}
+	return c
+}
+
+func (csp Policy) Compile() (CompiledPolicy, error) {
 	// group directives by name
 	bucket := make(map[string][]string)
 	for _, d := range csp {
 		bucket[d.Name] = append(bucket[d.Name], d.Value)
 	}
 
-	// TODO validate directives
-
 	// stringify directive groups
 	dstrs := make([]string, 0, len(bucket))
-	for k := range bucket {
-		dstr := k
-		dstr += " "
-		dstr += strings.Join(bucket[k], " ")
+	for dname, dvals := range bucket {
+		dval := compileList(dvals)
 
-		dstrs = append(dstrs, dstr)
+		if dval == NONE && (dname == "report-uri" || dname == "sandbox") {
+			// 'none' is not valid. omit directives entirely.
+			continue
+		}
+
+		d := fmt.Sprintf("%s %s", dname, dval)
+		dstrs = append(dstrs, d)
 	}
-	finalized := FinalizedPolicy(strings.Join(dstrs, "; "))
 
-	return finalized, nil
+	compiled := CompiledPolicy(strings.Join(dstrs, "; "))
+
+	return compiled, nil
 }
 
-func (csp Policy) MustFinalize() FinalizedPolicy {
-	final, err := csp.Finalize()
+func (csp Policy) MustCompile() CompiledPolicy {
+	compiled, err := csp.Compile()
 	if err != nil {
 		panic(err)
 	}
-	return final
+	return compiled
 }
 
-type FinalizedPolicy string
+type CompiledPolicy string
 
-func (csp FinalizedPolicy) Apply(header http.Header) {
+func (csp CompiledPolicy) Apply(header http.Header) {
 	header.Set("Content-Security-Policy", string(csp))
 }
 
-func (csp FinalizedPolicy) ApplyReportOnly(header http.Header) {
+func (csp CompiledPolicy) ApplyReportOnly(header http.Header) {
 	header.Set("Content-Security-Policy-Report-Only", string(csp))
 }
 
-func (csp FinalizedPolicy) Middleware(handler http.Handler) http.Handler {
+func (csp CompiledPolicy) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		csp.Apply(w.Header())
 		handler.ServeHTTP(w, r)
 	})
 }
 
-func (csp FinalizedPolicy) MiddlewareReportOnly() func(http.Handler) http.Handler {
+func (csp CompiledPolicy) MiddlewareReportOnly() func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			csp.ApplyReportOnly(w.Header())

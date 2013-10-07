@@ -12,27 +12,32 @@ func main() {
 	fmt.Println("Serving requests at http://localhost" + addr)
 
 	csp := httpcsp.Make().
-		DefaultSrc(httpcsp.SELF).
+		DefaultSrc(httpcsp.NONE).
+		ScriptSrc(httpcsp.SELF).
 		ImgSrc(httpcsp.SELF).
 		ReportURI("/policy/violation").
-		MustFinalize()
+		MustCompile()
+
 	fmt.Println("Content-Security-Policy:", csp)
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w,
-			`<html>
-			<body>
-				<strong>Boom!</strong>
-				<img src="https://travis-ci.org/bmatsuo/go-httpcsp.png?branch=master"/>
-				<strong>Zing!</strong>
-			</body>
-			</html>`)
-	})
+	http.Handle("/", csp.Middleware(http.HandlerFunc(Root)))
 
-	http.Handle("/policy/violation",
-		httpcsp.ViolationHandler(func(v *httpcsp.Violation) {
-			fmt.Printf("violation: %#v\n", v.CSP)
-		}))
+	http.Handle("/policy/violation", httpcsp.ViolationHandler(CSPViolation))
 
-	http.ListenAndServe(addr, csp.Middleware(http.DefaultServeMux))
+	http.ListenAndServe(addr, http.DefaultServeMux)
+}
+
+func Root(resp http.ResponseWriter, req *http.Request) {
+	fmt.Fprint(resp,
+		`<html>
+		<body>
+		<strong>Boom!</strong>
+		<img src="https://travis-ci.org/bmatsuo/go-httpcsp.png?branch=master"/>
+		<strong>Zing!</strong>
+		</body>
+		</html>`)
+}
+
+func CSPViolation(v *httpcsp.Violation) {
+	fmt.Printf("violation: %#v\n", v.CSP)
 }
