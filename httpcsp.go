@@ -59,7 +59,7 @@ type Violation struct {
 }
 
 // Create a handler for security policy violations. Used in conjunction with
-// CSP.ReportURI.
+// Policy.ReportURI.
 func ViolationHandler(f func(*Violation)) http.Handler {
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		if req.Method != "POST" {
