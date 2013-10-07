@@ -22,15 +22,17 @@ import (
 )
 
 const (
-	// the empty source-list
+	// The empty directive value. This has the effect of negating previosly
+	// declared values for a directive in a policy. The value is only valid
+	// for src directives. But Go-httpcsp allows it on other directives.
 	NONE = "'none'"
 
-	// allowed keyword-sources
+	// Keyword sources applicable to src directives.
 	SELF          = "'self'"
 	UNSAFE_INLINE = "'unsafe-inline'"
 	UNSAFE_EVAL   = "'unsafe-eval'"
 
-	// common scheme-sources
+	// Common scheme sources applicable to src directives.
 	HTTPS = "https:"
 )
 
