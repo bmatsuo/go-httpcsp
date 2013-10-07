@@ -5,7 +5,14 @@
 // netcsp.go [created: Sun, 28 Jul 2013]
 
 /*
-Web server utilities for implementing Content Security Policy (CSP) 1.0.
+Utilities for applying web content security policies (W3C CSP 1.0).
+
+Disclaimer
+
+This package is under development and the API has not yet stabilized.
+
+About
+
 Go-httpcsp provides a type, CSP, which describes a security policy and can be
 applied to http.ResponseWriter types. It also provides a simple wrapper
 function, ViolationHandler, for creating http.Handlers for dealing with reports
