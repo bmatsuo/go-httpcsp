@@ -1,5 +1,7 @@
 [godoc.org]: http://godoc.org/github.com/bmatsuo/go-httpcsp/ "godoc.org"
 
+[![Build Status](https://travis-ci.org/bmatsuo/go-httpcsp.png?branch=master)](https://travis-ci.org/bmatsuo/go-httpcsp)
+
 This is beta software and the API may change without notice.
 
 Install
