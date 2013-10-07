@@ -121,6 +121,20 @@ func (csp Policy) Compile() (CompiledPolicy, error) {
 			continue
 		}
 
+		var err error
+		vals := strings.Split(dval, " ")
+		switch dname {
+		case "sandbox":
+			err = validateSandbox(vals)
+		case "report-uri":
+			err = validateReportURI(vals)
+		default:
+			err = validateSourceList(vals)
+		}
+		if err != nil {
+			return "", err
+		}
+
 		d := fmt.Sprintf("%s %s", dname, dval)
 		dstrs = append(dstrs, d)
 	}
