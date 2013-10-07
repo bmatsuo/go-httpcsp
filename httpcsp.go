@@ -11,12 +11,15 @@ Disclaimer
 
 This package is under development and the API has not yet stabilized.
 
-About
+Building policies
 
-Go-httpcsp provides a type, CSP, which describes a security policy and can be
-applied to http.ResponseWriter types. It also provides a simple wrapper
-function, ViolationHandler, for creating http.Handlers for dealing with reports
-of attempted policy violation.
+The Policy type allows web applications to incrementally build/extend security
+policies. Policies are compiled and then applied to response headers.
+
+Violation reports
+
+Policy violation reports can be handled with http.Handlers constructed with
+the ViolationHandler() wrapper function.
 */
 package httpcsp
 
