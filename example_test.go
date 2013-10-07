@@ -22,7 +22,7 @@ func Example_chaining() {
 	// default-src 'none'; img-src *; sandbox allow-forms
 }
 
-// Policies derive other policies but are basically immutable.
+// Policies derive other policies but are immutable-ish.
 func Example_immutability() {
 	cspBase := New().
 		DefaultSrc(NONE).
