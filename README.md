@@ -14,6 +14,8 @@ Install
 Example
 =======
 
+An example web server can be is in the `example/` directory.
+
     go run example/example.go
 
 Reference
