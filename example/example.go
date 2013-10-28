@@ -12,8 +12,8 @@ func main() {
 	fmt.Println("Serving requests at http://localhost" + addr)
 
 	csp := httpcsp.New().
-		DefaultSrc(httpcsp.NONE).
-		ScriptSrc(httpcsp.SELF).
+		DefaultSrc(httpcsp.SELF).
+		ScriptSrc(httpcsp.NONE).
 		ImgSrc(httpcsp.SELF).
 		ReportURI("/policy/violation").
 		MustCompile()
@@ -34,6 +34,8 @@ func Root(resp http.ResponseWriter, req *http.Request) {
 		<strong>Boom!</strong>
 		<img src="https://travis-ci.org/bmatsuo/go-httpcsp.png?branch=master"/>
 		<strong>Zing!</strong>
+		<script type="text/javascript">alert("malicious stuff...");</script>
+		<script type="text/javascript" src="http://example.com/malicious.js"></script>
 	</body>
 	</html>`)
 }
