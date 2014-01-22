@@ -3,3 +3,7 @@ go:
 - 1.1
 - 1.2
 - tip
+
+script:
+- go get github.com/bmatsuo/yup
+- go test -v ./...
