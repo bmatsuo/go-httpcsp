@@ -4,17 +4,15 @@
 
 This is beta software and the API may change without notice.
 
-Install
-=======
-
     go get github.com/bmatsuo/go-httpcsp
-
-Example
-=======
 
 An example web server can be is in the `example/` directory.
 
     go run example/example.go
+
+While that's going...
+
+    open http://localhost:8000
 
 Reference
 =========
