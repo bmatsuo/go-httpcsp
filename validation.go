@@ -39,7 +39,7 @@ func validateSandbox(flag []string) error {
 }
 
 func validateSourceList(src []string) error {
-	if len(src) == 1 && src[0] == NONE {
+	if len(src) == 1 && src[0] == NONE { // i don't understand why this is none...
 		return nil
 	}
 	for i := range src {
@@ -76,8 +76,8 @@ func simpleRegexp(patt ...string) *regexp.Regexp {
 	return regexp.MustCompile(fullPatt)
 }
 
-var _schemePatt = `[:alpha:]([:alpha:]|[:digit:]|[+]|[-]|[.])*`
-var _hostChar = `([:alpha:]|[:digit:]|-)`
+var _schemePatt = `[A-Za-z]([A-Za-z]|\d|[+]|[-]|[.])*`
+var _hostChar = `([A-Za-z]|\d|-)`
 
 var schemePatt = simpleRegexp(`^`, _schemePatt, `[:]`, `$`)
 var hostPatt = simpleRegexp(
@@ -85,9 +85,9 @@ var hostPatt = simpleRegexp(
 	// scheme
 	`(`, _schemePatt, ` [:][/][/])?`,
 	// hostname
-	`([*] | [*] [.] `, _hostChar, ` ([.] `, _hostChar, `)*)`,
+	`(`, `[*]`,
+	`|`, `([*][.])?`, _hostChar, `+`, `([.]`, _hostChar, `+`, `)*`,
+	`)`,
 	// port
-	`([:digit:]+ | [*])?`,
-	// path
-	`(/ [^,;[:space:]])?`,
+	`([:]`, `(\d+ | [*])`, `)?`,
 	`$`)
