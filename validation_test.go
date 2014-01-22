@@ -28,4 +28,33 @@ func TestValidateSource(t *testing.T) {
 	} {
 		yt.Nil(t, validateSource(src))
 	}
+
+	for _, src := range []string{
+		"https://",
+		"example.com/blah",
+		"http://example.com/blah",
+		"*://example.com",
+	} {
+		yt.Error(t, validateSource(src))
+	}
+}
+
+func TestValidateSourceList(t *testing.T) {
+	for _, src := range [][]string{
+		{NONE},
+		{SELF, UNSAFE_INLINE, "http:"},
+		{"localhost", "example.com"},
+	} {
+		yt.Nil(t, validateSourceList(src))
+	}
+
+	for _, src := range [][]string{
+		{},
+		{NONE, "http:"},
+		{SELF, "https://"},
+		{"https://static.example.com", "example.com/blah", UNSAFE_INLINE},
+		{"http://example.com/blah", "https://"},
+	} {
+		yt.Error(t, validateSourceList(src))
+	}
 }

@@ -39,6 +39,9 @@ func validateSandbox(flag []string) error {
 }
 
 func validateSourceList(src []string) error {
+	if len(src) == 0 {
+		return fmt.Errorf("empty source list")
+	}
 	if len(src) == 1 && src[0] == NONE { // i don't understand why this is none...
 		return nil
 	}

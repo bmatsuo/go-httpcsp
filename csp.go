@@ -26,66 +26,67 @@ func New() Policy {
 }
 
 // The default-src directive.
-func (csp Policy) DefaultSrc(src ...string) Policy { // 4.1
-	return csp.addDirectives("default-src", src)
+func (csp Policy) DefaultSrc(src string, srcs ...string) Policy { // 4.1
+	return csp.addDirectives("default-src", src, srcs)
 }
 
 // The script-src directive.
-func (csp Policy) ScriptSrc(src ...string) Policy { // 4.2
-	return csp.addDirectives("script-src", src)
+func (csp Policy) ScriptSrc(src string, srcs ...string) Policy { // 4.2
+	return csp.addDirectives("script-src", src, srcs)
 }
 
 // The object-src directive.
-func (csp Policy) ObjectSrc(src ...string) Policy { // 4.3
-	return csp.addDirectives("object-src", src)
+func (csp Policy) ObjectSrc(src string, srcs ...string) Policy { // 4.3
+	return csp.addDirectives("object-src", src, srcs)
 }
 
 // The style-src directive.
-func (csp Policy) StyleSrc(src ...string) Policy { // 4.4
-	return csp.addDirectives("style-src", src)
+func (csp Policy) StyleSrc(src string, srcs ...string) Policy { // 4.4
+	return csp.addDirectives("style-src", src, srcs)
 }
 
 // The img-src directive.
-func (csp Policy) ImgSrc(src ...string) Policy { // 4.5
-	return csp.addDirectives("img-src", src)
+func (csp Policy) ImgSrc(src string, srcs ...string) Policy { // 4.5
+	return csp.addDirectives("img-src", src, srcs)
 }
 
 // The media-src directive.
-func (csp Policy) MediaSrc(src ...string) Policy { // 4.6
-	return csp.addDirectives("media-src", src)
+func (csp Policy) MediaSrc(src string, srcs ...string) Policy { // 4.6
+	return csp.addDirectives("media-src", src, srcs)
 }
 
 // The frame-src directive.
-func (csp Policy) FrameSrc(src ...string) Policy { // 4.7
-	return csp.addDirectives("frame-src", src)
+func (csp Policy) FrameSrc(src string, srcs ...string) Policy { // 4.7
+	return csp.addDirectives("frame-src", src, srcs)
 }
 
 // The font-src directive.
-func (csp Policy) FontSrc(src ...string) Policy { // 4.8
-	return csp.addDirectives("font-src", src)
+func (csp Policy) FontSrc(src string, srcs ...string) Policy { // 4.8
+	return csp.addDirectives("font-src", src, srcs)
 }
 
 // The connect-src directive.
-func (csp Policy) ConnectSrc(src ...string) Policy { // 4.9
-	return csp.addDirectives("connect-src", src)
+func (csp Policy) ConnectSrc(src string, srcs ...string) Policy { // 4.9
+	return csp.addDirectives("connect-src", src, srcs)
 }
 
 // The sandbox directive.
-func (csp Policy) Sandbox(token ...string) Policy { // 4.10 (Optional)
-	return csp.addDirectives("sandbox", token)
+func (csp Policy) Sandbox(token string, tokens ...string) Policy { // 4.10 (Optional)
+	return csp.addDirectives("sandbox", token, tokens)
 }
 
 // The report-uri directive.
-func (csp Policy) ReportURI(uri ...string) Policy { // 4.11
-	return csp.addDirectives("report-uri", uri)
+func (csp Policy) ReportURI(uri string, uris ...string) Policy { // 4.11
+	return csp.addDirectives("report-uri", uri, uris)
 }
 
-func (csp Policy) addDirectives(name string, values []string) Policy {
+func (csp Policy) addDirectives(name string, v string, vs []string) Policy {
 	// duplicate to avoid slice append overwrites :(
-	_csp := make(Policy, 0, len(csp)+len(values))
+	_csp := make(Policy, 0, len(csp)+len(vs)+1)
 	_csp = append(_csp, csp...)
-	for i := range values {
-		_csp = append(_csp, &Directive{name, values[i]})
+	_csp = append(_csp, &Directive{name, v})
+	for i := range vs {
+		_csp = append(_csp, &Directive{name, vs[i]})
 	}
 	return _csp
 }
