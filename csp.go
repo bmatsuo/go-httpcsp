@@ -17,6 +17,10 @@ type Directive struct {
 	Value string
 }
 
+func (d *Directive) String() string {
+	return fmt.Sprint(*d)
+}
+
 func New() Policy {
 	return make(Policy, 0)
 }
