@@ -18,16 +18,14 @@ func validateReportURI(uri []string) error {
 	return nil
 }
 
-var sandboxNegPatt = simpleRegexp(`
-	\x7F
-	|	[\x00-\x1F]
-	|   \x20	|	\t	|	\n
-	|	[	(	)	<	>	@
-			,	;	:	\\	"
-			/	\[	\]	?	=
-			{	}
-		]
-	`)
+var sandboxNegPatt = simpleRegexp(
+	`\x7F | [\x00-\x1F] | \x20 | \t | \n
+	| [
+		(	)	<	>	@
+		,	;	:	\\	"
+		/	\[	\]	?	=
+		{	}
+	]`)
 
 // sandbox values are restricted from having control characters, space,
 // and certain symbols.
@@ -81,17 +79,15 @@ func simpleRegexp(patt ...string) *regexp.Regexp {
 var _schemePatt = `[:alpha:]([:alpha:]|[:digit:]|[+]|[-]|[.])*`
 var _hostChar = `([:alpha:]|[:digit:]|-)`
 
-var schemePatt = simpleRegexp(`^
-	`, _schemePatt, `
-	[:]
-	$`)
-var hostPatt = simpleRegexp(`^
-	(	`, _schemePatt, `
-		[:][/][/])?
-	(	[*]
-	|	[*] [.]
-		`, _hostChar, `
-		([.] `, _hostChar, `)*)
-	([:digit:]+ | [*])?
-	(/ [^,;[:space:]])?
-	$`)
+var schemePatt = simpleRegexp(`^`, _schemePatt, `[:]`, `$`)
+var hostPatt = simpleRegexp(
+	`^`,
+	// scheme
+	`(`, _schemePatt, ` [:][/][/])?`,
+	// hostname
+	`([*] | [*] [.] `, _hostChar, ` ([.] `, _hostChar, `)*)`,
+	// port
+	`([:digit:]+ | [*])?`,
+	// path
+	`(/ [^,;[:space:]])?`,
+	`$`)
