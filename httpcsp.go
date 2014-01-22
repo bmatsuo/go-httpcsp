@@ -60,7 +60,7 @@ type Violation struct {
 
 // Create a handler for security policy violations. Used in conjunction with
 // Policy.ReportURI.
-func ViolationHandler(f func(*Violation)) http.Handler {
+func ViolationHandler(f func(http.ResponseWriter, *Violation)) http.Handler {
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		if req.Method != "POST" {
 			resp.Header().Set("Allow", "POST")
@@ -85,7 +85,7 @@ func ViolationHandler(f func(*Violation)) http.Handler {
 		}
 
 		if f != nil {
-			f(v)
+			f(resp, v)
 		}
 	})
 }

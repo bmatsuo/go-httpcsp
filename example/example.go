@@ -1,8 +1,51 @@
+/*
+An example instrumentation of github.com/bmatsuo/go-httpcsp.
+
+	go run example.go
+
+The example serves a CSP-protected website at http://localhost:8000. The landing
+page has a bunch of tags telling the browser to load (and execute) content of
+suspect origins. The security policy does not allow the browser to load the
+resources, keeping the content on the page safe.
+
+Other than the landing page, http://localhost:8000/danger-zone contains the same
+content but is served with an altered (weaker) security policy. The altered
+policy allows the inline script to be executed, causing a browser alert.
+
+The following shell session demonstrates the security policy served from the
+landing page.
+
+	$ curl -v -s http://localhost:8000 > /dev/null
+	...
+	* Connected to localhost (127.0.0.1) port 8000 (#0)
+	> GET / HTTP/1.1
+	> ...
+	< HTTP/1.1 200 OK
+	< Content-Security-Policy: default-src 'self'; script-src 'none'; img-src 'self'; report-uri /policy/violation
+	< ...
+	* Connection #0 to host localhost left intact
+	$
+
+Where as this shell session demonstrates the modified policy served from the
+/danger-zone path.
+
+	$ curl -v -s http://localhost:8000/danger-zone > /dev/null
+	* Connected to localhost (127.0.0.1) port 8000 (#0)
+	> GET /danger-zone HTTP/1.1
+	> ...
+	< HTTP/1.1 200 OK
+	< Content-Security-Policy: default-src 'self'; script-src 'unsafe-inline'; img-src 'self'; report-uri /policy/violation
+	< ...
+	* Connection #0 to host localhost left intact
+	$
+*/
 package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"sync/atomic"
 
 	"github.com/bmatsuo/go-httpcsp"
 )
@@ -48,6 +91,15 @@ func Root(resp http.ResponseWriter, req *http.Request) {
 	</html>`)
 }
 
-func CSPViolation(v *httpcsp.Violation) {
-	fmt.Printf("violation: %#v\n", v.CSP)
+func CSPViolation(resp http.ResponseWriter, v *httpcsp.Violation) {
+	id := newViolationId()
+	log.Printf("csp violation %d: %#v\n", id, v.CSP)
+	fmt.Fprintf(resp, "violation id: %d", id)
+}
+
+// silly violation id generator
+var vcount int64
+
+func newViolationId() int64 {
+	return atomic.AddInt64(&vcount, 1)
 }
