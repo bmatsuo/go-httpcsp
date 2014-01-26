@@ -55,22 +55,26 @@ func main() {
 	fmt.Println("Serving requests at http://localhost" + addr)
 
 	// define security policies with a chaining api.
-	csp := httpcsp.New().
+	cspbase := httpcsp.New().
 		DefaultSrc(httpcsp.SELF).
 		ScriptSrc(httpcsp.NONE).
 		ImgSrc(httpcsp.SELF).
 		ReportURI("/policy/violation")
-	fmt.Println("GLOBAL POLICY:", csp)
+	fmt.Println("GLOBAL POLICY:", cspbase)
+
 
 	// extend existing policies for localized exceptions to the global policy.
-	cspinline := csp.ScriptSrc(httpcsp.UNSAFE_INLINE)
-	fmt.Println("UNSAFE EXCEPTION:", csp)
+	cspimg := cspbase.ImgSrc("travis-ci.org", "api.travis-ci.org")
+	cspinline := cspbase.ScriptSrc(httpcsp.UNSAFE_INLINE)
+	fmt.Println("IMAGE EXCEPTION:", cspimg)
+	fmt.Println("UNSAFE EXCEPTION:", cspinline)
 
-	base := http.NewServeMux()
-	base.Handle("/", csp.MustCompile().Middleware(http.HandlerFunc(Root)))
-	base.Handle("/danger-zone", cspinline.MustCompile().Middleware(http.HandlerFunc(Root)))
-
-	http.Handle("/", base)
+	// more deeply nested middleware takes precedence.
+	root := http.NewServeMux()
+	root.Handle("/", http.HandlerFunc(Root))
+	root.Handle("/images", cspimg.MustCompile().Middleware(http.HandlerFunc(Root)))
+	root.Handle("/danger-zone", cspinline.MustCompile().Middleware(http.HandlerFunc(Root)))
+	http.Handle("/", cspbase.MustCompile().Middleware(root))
 
 	// the violation handler doesn't serve HTML and does not need CSP headers.
 	http.Handle("/policy/violation", httpcsp.ViolationHandler(CSPViolation))
