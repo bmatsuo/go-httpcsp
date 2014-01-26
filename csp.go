@@ -1,20 +1,26 @@
 package httpcsp
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
-	"strings"
 	"sort"
 )
 
 // flag for testing
 var _FIX_COMPILE_ORDER bool
 
+type sortablePolicy Policy
+
+func (sp sortablePolicy) Len() int           { return len(sp) }
+func (sp sortablePolicy) Swap(i, j int)      { sp[i], sp[j] = sp[j], sp[i] }
+func (sp sortablePolicy) Less(i, j int) bool { return sp[i].Name < sp[j].Name }
+
 type Policy []*Directive
 
 type Directive struct {
-	Name  string
-	Value string
+	Name   string
+	Values []string
 }
 
 func (d *Directive) String() string {
@@ -81,14 +87,76 @@ func (csp Policy) ReportURI(uri string, uris ...string) Policy { // 4.11
 }
 
 func (csp Policy) addDirectives(name string, v string, vs []string) Policy {
-	// duplicate to avoid slice append overwrites :(
-	_csp := make(Policy, 0, len(csp)+len(vs)+1)
-	_csp = append(_csp, csp...)
-	_csp = append(_csp, &Directive{name, v})
-	for i := range vs {
-		_csp = append(_csp, &Directive{name, vs[i]})
+	vs = append([]string{v}, vs...)
+	n := len(csp)
+	// three-index avoids overwrites at policy extension forking points
+	return append(csp[:n:n], &Directive{name, vs})
+}
+
+// check the policy for errors and compact internal representations.
+func (csp Policy) Check() (Policy, error) {
+	// group directives by name
+	bucket := make(map[string][]string)
+	for _, d := range csp {
+		bucket[d.Name] = append(bucket[d.Name], d.Values...)
 	}
-	return _csp
+
+	// validate directives
+	for dname, dvals := range bucket {
+		var err error
+		switch dname {
+		case "sandbox":
+			err = validateSandbox(dvals)
+		case "report-uri":
+			err = validateReportURI(dvals)
+		default:
+			err = _validateSourceList(dvals, false)
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if len(bucket) == len(csp) {
+		return csp, nil
+	}
+
+	// compact directives
+	_csp := make(Policy, 0, len(bucket))
+	for dname, dvals := range bucket {
+		dvals = compileList1(dvals)
+
+		isNONE := len(dvals) == 1 && dvals[0] == NONE
+		if isNONE && (dname == "report-uri" || dname == "sandbox") {
+			// 'none' is not valid. omit directives entirely.
+			continue
+		}
+
+		// don't use addDirective here for efficiency
+		_csp = append(_csp, &Directive{dname, dvals})
+	}
+
+	if _FIX_COMPILE_ORDER {
+		sort.Sort(sortablePolicy(_csp))
+	}
+
+	return _csp, nil
+}
+
+func compileList1(dvals []string) []string {
+	var c []string
+	for _, d := range dvals {
+		switch {
+		case d == NONE:
+			c = []string{NONE}
+		case len(c) == 0 || c[0] == NONE: // NONE implies len of 1
+			c = []string{d}
+		default:
+			c = append(c, d)
+		}
+	}
+	return c
 }
 
 func compileList(dvals []string) string {
@@ -107,48 +175,26 @@ func compileList(dvals []string) string {
 }
 
 // Compile csp into a form that can be applied to response headers.
+// Calls csp.Check() before constructing the CompiledPolicy
 func (csp Policy) Compile() (CompiledPolicy, error) {
-	// group directives by name
-	bucket := make(map[string][]string)
-	for _, d := range csp {
-		bucket[d.Name] = append(bucket[d.Name], d.Value)
+	_csp, err := csp.Check()
+	if err != nil {
+		return "", err
 	}
-
-	// stringify directive groups
-	dstrs := make([]string, 0, len(bucket))
-	for dname, dvals := range bucket {
-		dval := compileList(dvals)
-
-		if dval == NONE && (dname == "report-uri" || dname == "sandbox") {
-			// 'none' is not valid. omit directives entirely.
+	buf := new(bytes.Buffer)
+	printed := false
+	for _, d := range _csp {
+		valstr := compileList(d.Values)
+		if valstr == "" {
 			continue
 		}
-
-		var err error
-		vals := strings.Split(dval, " ")
-		switch dname {
-		case "sandbox":
-			err = validateSandbox(vals)
-		case "report-uri":
-			err = validateReportURI(vals)
-		default:
-			err = validateSourceList(vals)
+		if printed {
+			fmt.Fprint(buf, "; ")
 		}
-		if err != nil {
-			return "", err
-		}
-
-		d := fmt.Sprintf("%s %s", dname, dval)
-		dstrs = append(dstrs, d)
+		fmt.Fprintf(buf, "%s %s", d.Name, valstr)
+		printed = true
 	}
-
-	if _FIX_COMPILE_ORDER {
-		sort.Strings(dstrs)
-	}
-
-	compiled := CompiledPolicy(strings.Join(dstrs, "; "))
-
-	return compiled, nil
+	return CompiledPolicy(buf.String()), nil
 }
 
 func (csp Policy) MustCompile() CompiledPolicy {

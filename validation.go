@@ -38,7 +38,7 @@ func validateSandbox(flag []string) error {
 	return nil
 }
 
-func validateSourceList(src []string) error {
+func _validateSourceList(src []string, strict bool) error {
 	if len(src) == 0 {
 		return fmt.Errorf("empty source list")
 	}
@@ -46,7 +46,7 @@ func validateSourceList(src []string) error {
 		return nil
 	}
 	for i := range src {
-		err := validateSource(src[i])
+		err := validateSource(src[i], strict)
 		if err != nil {
 			return err
 		}
@@ -54,8 +54,14 @@ func validateSourceList(src []string) error {
 	return nil
 }
 
-func validateSource(src string) error {
+func validateSourceList(src []string) error {
+	return _validateSourceList(src, true)
+}
+
+// strict determines if NONE is allowed
+func validateSource(src string, strict bool) error {
 	switch {
+	case !strict && src == NONE:
 	case src == SELF:
 	case src == UNSAFE_INLINE:
 	case src == UNSAFE_EVAL:

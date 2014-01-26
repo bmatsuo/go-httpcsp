@@ -26,7 +26,7 @@ func TestValidateSource(t *testing.T) {
 		"example.com:4567",
 		"https://example.com",
 	} {
-		yt.Nil(t, validateSource(src))
+		yt.Nil(t, validateSource(src, true))
 	}
 
 	for _, src := range []string{
@@ -35,7 +35,7 @@ func TestValidateSource(t *testing.T) {
 		"http://example.com/blah",
 		"*://example.com",
 	} {
-		yt.Error(t, validateSource(src))
+		yt.Error(t, validateSource(src, true))
 	}
 }
 

@@ -8,7 +8,7 @@ package httpcsp
 
 import (
 	yt "github.com/bmatsuo/yup/yuptype"
-	//"github.com/bmatsuo/yup"
+	ytxt "github.com/bmatsuo/yup/yuptext"
 
 	"fmt"
 	"testing"
@@ -28,9 +28,21 @@ var thetestcsp = New().
 	Sandbox("mudpies!").
 	ReportURI("http://example.com/reports")
 
+func TestCapacityBug(t *testing.T) {
+	csp := New().DefaultSrc("https:")
+	one := csp.ScriptSrc(UNSAFE_INLINE)
+	two := csp.ImgSrc("example.com")
+	onec, err := one.Compile()
+	yt.Nil(t, err)
+	ytxt.ContainsString(t, string(onec), "script-src")
+	twoc, err := two.Compile()
+	yt.Nil(t, err)
+	ytxt.ContainsString(t, string(twoc), "img-src")
+}
+
 func TestPolicy(t *testing.T) {
 	yt.Equal(t, fmt.Sprint(thetestcsp),
-		`[{default-src 'none'} {script-src 'unsafe-inline'} {script-src 'unsafe-eval'} {object-src localhost} {style-src example.com} {img-src example.com:*} {media-src example.com:4567} {frame-src https://example.com} {font-src http://example.com:4321} {connect-src 'self'} {sandbox mudpies!} {report-uri http://example.com/reports}]`)
+		`[{default-src ['none']} {script-src ['unsafe-inline']} {script-src ['unsafe-eval']} {object-src [localhost]} {style-src [example.com]} {img-src [example.com:*]} {media-src [example.com:4567]} {frame-src [https://example.com]} {font-src [http://example.com:4321]} {connect-src ['self']} {sandbox [mudpies!]} {report-uri [http://example.com/reports]}]`)
 }
 
 func TestCompile(t *testing.T) {
