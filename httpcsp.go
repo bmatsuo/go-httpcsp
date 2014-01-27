@@ -25,6 +25,7 @@ package httpcsp
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -64,23 +65,29 @@ func ViolationHandler(f func(http.ResponseWriter, *Violation)) http.Handler {
 	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		if req.Method != "POST" {
 			resp.Header().Set("Allow", "POST")
-			http.Error(resp, "", http.StatusMethodNotAllowed)
+			resp.WriteHeader(http.StatusMethodNotAllowed)
+			fmt.Fprintln(resp, "this resource only accepts POST requests\n")
 			return
 		}
 
 		defer req.Body.Close()
 
-		mime := strings.SplitN(req.Header.Get("Content-Type"), ";", 2)[0]
-		if mime != "application/json" && mime != "application/csp-report" {
-			http.Error(resp, "", http.StatusUnsupportedMediaType)
-			return
-		}
-
 		v := new(Violation)
-		dec := json.NewDecoder(req.Body)
-		err := dec.Decode(v)
-		if err != nil {
-			http.Error(resp, "", http.StatusBadRequest)
+
+		mime := strings.SplitN(req.Header.Get("Content-Type"), ";", 2)[0]
+		switch mime {
+		case "application/json", "application/csp-report":
+			dec := json.NewDecoder(req.Body)
+			err := dec.Decode(v)
+			if err != nil {
+				resp.WriteHeader(http.StatusBadRequest)
+				fmt.Fprintln(resp, "invalid request entity")
+				return
+			}
+		default:
+			resp.WriteHeader(http.StatusUnsupportedMediaType)
+			fmt.Fprintln(resp,
+				"content-type not one of {application/json, applicaiton/csp-report}")
 			return
 		}
 
