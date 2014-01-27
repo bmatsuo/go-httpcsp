@@ -8,36 +8,11 @@ page has a bunch of tags telling the browser to load (and execute) content of
 suspect origins. The security policy does not allow the browser to load the
 resources, keeping the content on the page safe.
 
-Other than the landing page, http://localhost:8000/danger-zone contains the same
-content but is served with an altered (weaker) security policy. The altered
-policy allows the inline script to be executed, causing a browser alert.
-
-The following shell session demonstrates the security policy served from the
-landing page.
-
-	$ curl -v -s http://localhost:8000 > /dev/null
-	...
-	* Connected to localhost (127.0.0.1) port 8000 (#0)
-	> GET / HTTP/1.1
-	> ...
-	< HTTP/1.1 200 OK
-	< Content-Security-Policy: default-src 'self'; script-src 'none'; img-src 'self'; report-uri /policy/violation
-	< ...
-	* Connection #0 to host localhost left intact
-	$
-
-Where as this shell session demonstrates the modified policy served from the
-/danger-zone path.
-
-	$ curl -v -s http://localhost:8000/danger-zone > /dev/null
-	* Connected to localhost (127.0.0.1) port 8000 (#0)
-	> GET /danger-zone HTTP/1.1
-	> ...
-	< HTTP/1.1 200 OK
-	< Content-Security-Policy: default-src 'self'; script-src 'unsafe-inline'; img-src 'self'; report-uri /policy/violation
-	< ...
-	* Connection #0 to host localhost left intact
-	$
+Other than the landing page modified security policies can be observed on paths
+	/danger-zone
+	/images
+The page content is the same at all paths, but the varying policies allow
+different content to be loaded.
 */
 package main
 
